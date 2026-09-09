@@ -1,0 +1,31 @@
+{
+  "name": "david-tobias-chidera-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portfolio for David Tobias Chidera \u2014 graphics, software, sound, cinematography, mobile photography.",
+  "scripts": {
+    "dev": "node api.js && next dev",
+    "build": "node api.js && next build",
+    "start": "node api.js && next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "^15.5.4",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "resend": "^4.6.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@tailwindcss/postcss": "^4.1.13",
+    "@types/node": "^22.18.1",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "eslint": "^9.35.0",
+    "eslint-config-next": "^15.5.4",
+    "tailwindcss": "^4.1.13",
+    "typescript": "^5.9.2"
+  }
+}

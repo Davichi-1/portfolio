@@ -1,0 +1,431 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   DESIGN TOKENS
+   The palette is SMPTE broadcast colour bars, pulled down in saturation so
+   they read as instrument LEDs rather than test-pattern primaries. Base is a
+   cool graphite — the colour of an unlit LCD in a dark room, not pure black.
+   Each discipline owns one hue. Photography owns the neutral grey card,
+   which is what keeps the set from becoming five loud colours at once.
+   ========================================================================== */
+
+/* `static` matters here: by default Tailwind v4 only emits theme variables it
+   sees used as utility classes. Several tokens below are consumed only by the
+   custom CSS further down via var(), and would otherwise be tree-shaken away —
+   silently dropping the display typeface and every custom easing. */
+@theme static {
+  /* Surfaces, darkest to lightest */
+  --color-ink: #0b1114;
+  --color-ink-2: #0f181c;
+  --color-ink-3: #141f24;
+  --color-ink-4: #1a282e;
+  --color-line: #22343a;
+  --color-line-bright: #2f474f;
+
+  /* Text — warm bone against the cool base */
+  --color-bone: #e7e2d7;
+  --color-bone-2: #a8b0ae;
+  --color-bone-3: #6d7877;
+
+  /* Discipline hues */
+  --color-amber: #e8b33c; /* cinematography — tungsten, the REC light */
+  --color-cyan: #3fbfd1; /* sound — VU meter teal */
+  --color-magenta: #d2569b; /* graphics — process magenta */
+  --color-mint: #5fcb8c; /* software — signal green */
+  --color-card: #cdc6b8; /* photography — the 18% grey card */
+
+  /* Typography */
+  --font-display: var(--font-anybody), "Arial Narrow", sans-serif;
+  --font-body: var(--font-archivo), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  /* Fluid type scale */
+  --text-micro: 0.625rem;
+  --text-mono-sm: 0.6875rem;
+  --text-hero: clamp(2.75rem, 11vw, 9.5rem);
+  --text-section: clamp(1.75rem, 4.5vw, 3.5rem);
+  --text-lead: clamp(1.0625rem, 1.9vw, 1.5rem);
+
+  /* Motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-film: cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+
+* {
+  border-color: var(--color-line);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* The header is fixed, so anything reached by a hash link has to stop clear of
+   it or its heading lands underneath. Below md the header carries a second row
+   of section links once scrolled (99px total); from md up that row is hidden
+   and the bar is 56px. */
+section[id],
+[id^="discipline-"] {
+  scroll-margin-top: 6.75rem;
+}
+
+@media (min-width: 768px) {
+  section[id],
+  [id^="discipline-"] {
+    scroll-margin-top: 5rem;
+  }
+}
+
+body {
+  background-color: var(--color-ink);
+  color: var(--color-bone);
+  font-family: var(--font-body);
+  font-feature-settings: "kern" 1, "liga" 1;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: var(--color-amber);
+  color: var(--color-ink);
+}
+
+/* Visible keyboard focus, never a bare outline:none */
+:focus-visible {
+  outline: 2px solid var(--color-amber);
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+
+/* Scrollbar reads as part of the console */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-ink);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border: 3px solid var(--color-ink);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-line-bright);
+}
+
+/* ==========================================================================
+   TYPOGRAPHY PRIMITIVES
+   The display face is variable-width. Width is used as an expressive axis —
+   type stretching the way a signal stretches.
+   ========================================================================== */
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 0.86;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-sm);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-bone-3);
+}
+
+.mono-data {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+/* ==========================================================================
+   CONSOLE SURFACES
+   ========================================================================== */
+
+.panel {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--color-ink-2) 92%, white 8%) 0%,
+    var(--color-ink-2) 55%
+  );
+  border: 1px solid var(--color-line);
+  position: relative;
+}
+
+/* Faint top highlight — light catching a bevelled module edge */
+.panel::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--color-bone) 12%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+
+/* Machined tick scale, used along section edges */
+.tick-scale {
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--color-line) 0 1px,
+    transparent 1px 9px
+  );
+}
+
+.tick-scale-v {
+  background-image: repeating-linear-gradient(
+    180deg,
+    var(--color-line) 0 1px,
+    transparent 1px 9px
+  );
+}
+
+/* ==========================================================================
+   FILM GRAIN + SCANLINE ATMOSPHERE
+   Justified by the brief: he shoots film-minded stills and motion.
+   Kept under 4% opacity so it reads as texture, never as noise.
+   ========================================================================== */
+
+.grain-layer {
+  position: fixed;
+  inset: -50%;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  will-change: transform;
+  animation: grain-shift 700ms steps(1) infinite;
+}
+
+@keyframes grain-shift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2%, 1%); }
+  50% { transform: translate(1%, -2%); }
+  75% { transform: translate(-1%, -1%); }
+  100% { transform: translate(2%, 1%); }
+}
+
+.scanlines {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent 0 2px,
+    rgba(0, 0, 0, 0.16) 2px 3px
+  );
+  mix-blend-mode: multiply;
+}
+
+/* ==========================================================================
+   SCROLL REVEAL — a film wipe, not a generic fade-up
+   ========================================================================== */
+
+.reveal {
+  opacity: 0;
+  /* Deliberately NOT `inset(0 100% 0 0)`. IntersectionObserver measures the
+     clipped box, so a full-width clip gives the element zero area, reports
+     ratio 0 forever, and the reveal can never fire — the element hides itself
+     out of its own trigger. Leaving a 2px sliver keeps the area non-zero.
+     Nothing shows through: opacity is 0 until the reveal lands. */
+  clip-path: inset(0 calc(100% - 2px) 0 0);
+  transition:
+    opacity 0.5s var(--ease-film),
+    clip-path 0.9s var(--ease-film),
+    transform 0.9s var(--ease-out-expo);
+  transform: translateY(10px);
+}
+
+.reveal[data-visible="true"] {
+  opacity: 1;
+  clip-path: inset(0 0 0 0);
+  transform: none;
+}
+
+/* ==========================================================================
+   BOOT SEQUENCE — the one orchestrated moment. Console powering up.
+   ========================================================================== */
+
+@keyframes boot-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+/* Display type resolves by widening — condensed to full, like a signal
+   settling into its true shape. */
+@keyframes width-resolve {
+  from {
+    font-stretch: 68%;
+    opacity: 0;
+    letter-spacing: 0.06em;
+  }
+  to {
+    font-stretch: 100%;
+    opacity: 1;
+    letter-spacing: -0.03em;
+  }
+}
+
+.boot {
+  animation: boot-in 0.85s var(--ease-out-expo) both;
+}
+
+.boot-resolve {
+  animation: width-resolve 1.5s var(--ease-out-expo) both;
+}
+
+@keyframes led-flick {
+  0%, 100% { opacity: 1; }
+  45% { opacity: 0.35; }
+}
+
+.led-live {
+  animation: led-flick 2.4s ease-in-out infinite;
+}
+
+/* VU meter — channel activity on the strip. CSS only, no JS per frame. */
+@keyframes vu-bounce {
+  0%, 100% { transform: scaleY(0.18); }
+  20% { transform: scaleY(0.72); }
+  40% { transform: scaleY(0.34); }
+  60% { transform: scaleY(0.95); }
+  80% { transform: scaleY(0.5); }
+}
+
+.vu-bar {
+  transform-origin: bottom;
+  animation: vu-bounce 1.9s ease-in-out infinite;
+}
+
+
+/* ==========================================================================
+   MARQUEE
+   ========================================================================== */
+
+@keyframes marquee-run {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  animation: marquee-run var(--marquee-duration, 38s) linear infinite;
+  will-change: transform;
+}
+
+/* ==========================================================================
+   LINKS — an underline that wipes in, like a fader travelling
+   ========================================================================== */
+
+.link-wipe {
+  position: relative;
+  display: inline-block;
+}
+
+.link-wipe::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s var(--ease-film);
+}
+
+.link-wipe:hover::after,
+.link-wipe:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* ==========================================================================
+   CURSOR — a viewfinder reticle. Desktop, fine-pointer only.
+   ========================================================================== */
+
+@media (hover: hover) and (pointer: fine) {
+  .cursor-host,
+  .cursor-host a,
+  .cursor-host button {
+    cursor: none;
+  }
+}
+
+.reticle {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 101;
+  pointer-events: none;
+  mix-blend-mode: difference;
+  transition:
+    width 0.28s var(--ease-out-expo),
+    height 0.28s var(--ease-out-expo),
+    opacity 0.2s linear;
+}
+
+/* ==========================================================================
+   REDUCED MOTION — everything ambient stops, nothing disappears
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    clip-path: none;
+    transform: none;
+  }
+
+  .grain-layer {
+    animation: none;
+  }
+
+  .marquee-track {
+    animation: none;
+  }
+
+  .reticle {
+    display: none;
+  }
+
+  .cursor-host,
+  .cursor-host a,
+  .cursor-host button {
+    cursor: auto;
+  }
+}
